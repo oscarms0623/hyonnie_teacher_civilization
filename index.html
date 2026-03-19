@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>나는 어떤 문명인일까?</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --meso: #B5621E;
+    --egypt: #C49A0A;
+    --india: #2E7D5E;
+    --china: #A03030;
+    --bg: #F5F0E8;
+    --bg2: #EDE7D9;
+    --surface: #FFFFFF;
+    --surface2: #F9F6F0;
+    --accent: #B5621E;
+    --accent2: #E8A44A;
+    --text: #1A1612;
+    --text-mid: #4A4037;
+    --text-muted: #7A6A5A;
+    --border: rgba(120,90,50,0.15);
+    --border-strong: rgba(120,90,50,0.28);
+    --shadow: 0 2px 16px rgba(80,50,20,0.08);
+    --shadow-md: 0 4px 24px rgba(80,50,20,0.13);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 5% 0%, rgba(181,98,30,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 95% 100%, rgba(196,154,10,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 2.5rem 1.25rem 5rem;
+  }
+
+  /* ── INTRO ── */
+  #intro-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  .intro-emblem {
+    width: 110px;
+    height: 110px;
+    margin-bottom: 1.75rem;
+  }
+
+  .intro-emblem svg {
+    width: 100%;
+    height: 100%;
+    animation: rotateSlow 40s linear infinite;
+    filter: drop-shadow(0 2px 10px rgba(181,98,30,0.25));
+  }
+
+  .intro-kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.7rem;
+  }
+
+  .intro-title {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(2rem, 8vw, 3rem);
+    font-weight: 900;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+    letter-spacing: -0.02em;
+  }
+
+  .intro-title span { color: var(--accent); }
+
+  .intro-sub {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    margin-bottom: 2.25rem;
+    line-height: 1.6;
+  }
+
+  .intro-desc {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 1.25rem;
+    text-align: left;
+    width: 100%;
+    box-shadow: var(--shadow);
+  }
+
+  .intro-desc p {
+    font-size: 0.93rem;
+    color: var(--text-mid);
+    line-height: 1.85;
+    margin-bottom: 0.75rem;
+  }
+
+  .intro-desc p:last-child { margin-bottom: 0; }
+  .intro-desc strong { color: var(--accent); font-weight: 700; }
+
+  .civ-preview {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+    width: 100%;
+    margin-bottom: 1.75rem;
+  }
+
+  .civ-chip {
+    background: var(--surface);
+    border: 1.5px solid var(--border-strong);
+    border-radius: 10px;
+    padding: 0.65rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    box-shadow: var(--shadow);
+  }
+
+  .civ-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .start-btn {
+    width: 100%;
+    padding: 1.1rem 2rem;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    box-shadow: 0 4px 20px rgba(181,98,30,0.35);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .start-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(181,98,30,0.45);
+  }
+
+  .start-btn:active { transform: scale(0.98); }
+
+  /* ── QUIZ ── */
+  #quiz-screen { display: none; }
+
+  .progress-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 1.4rem;
+    opacity: 0;
+    animation: fadeUp 0.5s 0.05s ease both;
+  }
+
+  .q-counter {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .q-counter span { color: var(--accent); font-size: 1rem; }
+
+  .progress-track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+    transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .q-hint-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(181,98,30,0.1);
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(181,98,30,0.2);
+    white-space: nowrap;
+  }
+
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 20px;
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  .question-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.65rem;
+    display: block;
+    line-height: 1;
+  }
+
+  .question-text {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.1rem, 4vw, 1.3rem);
+    font-weight: 700;
+    line-height: 1.55;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+
+  .question-context {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 1.25rem;
+    line-height: 1.6;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .opt {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    transition: border-color 0.18s, background 0.18s, transform 0.15s, box-shadow 0.18s;
+    text-align: left;
+    width: 100%;
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+
+  .opt:hover {
+    border-color: var(--accent2);
+    background: #FFFBF4;
+    transform: translateX(3px);
+    box-shadow: 0 2px 10px rgba(181,98,30,0.09);
+  }
+
+  .opt.selected {
+    border-color: var(--accent);
+    background: #FFF3E0;
+    transform: translateX(3px);
+    box-shadow: 0 2px 12px rgba(181,98,30,0.14);
+  }
+
+  .opt-label {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: background 0.18s, color 0.18s;
+  }
+
+  .opt.selected .opt-label { background: var(--accent); color: #fff; }
+
+  .opt-text {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--text-mid);
+    padding-top: 3px;
+  }
+
+  .opt.selected .opt-text { color: var(--text); font-weight: 500; }
+
+  .nav-row {
+    display: flex;
+    gap: 10px;
+    opacity: 0;
+    animation: fadeUp 0.5s 0.2s ease both;
+  }
+
+  .nav-btn {
+    padding: 0.85rem 1.4rem;
+    border-radius: 12px;
+    border: 1.5px solid var(--border-strong);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+    box-shadow: var(--shadow);
+  }
+
+  .nav-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .nav-btn:disabled { opacity: 0.35; cursor: default; }
+
+  .nav-btn.next {
+    background: var(--accent);
+    color: #fff;
+    border-color: transparent;
+    font-weight: 700;
+    flex: 1;
+    box-shadow: 0 3px 16px rgba(181,98,30,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+
+  .nav-btn.next:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 20px rgba(181,98,30,0.4);
+  }
+
+  .nav-btn.next:active:not(:disabled) { transform: scale(0.98); }
+  .nav-btn.next:disabled { opacity: 0.4; cursor: default; }
+
+  /* ── RESULT ── */
+  #result-screen { display: none; }
+
+  .result-header {
+    text-align: center;
+    margin-bottom: 1.75rem;
+    opacity: 0;
+    animation: fadeUp 0.6s 0.05s ease both;
+  }
+
+  .result-kicker {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .result-emblem {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    margin: 0 auto 1rem;
+    box-shadow: var(--shadow-md);
+  }
+
+  .result-civ-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: clamp(1.7rem, 6vw, 2.4rem);
+    font-weight: 900;
+    line-height: 1.2;
+    margin-bottom: 0.3rem;
+  }
+
+  .result-sub { font-size: 0.9rem; color: var(--text-muted); }
+
+  .result-body {
+    opacity: 0;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .result-desc-card {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+  }
+
+  .result-desc-card p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--text-mid);
+  }
+
+  .traits-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 1.1rem;
+  }
+
+  .trait-tag {
+    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1.5px solid;
+    font-weight: 700;
+  }
+
+  .scores-card {
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 16px;
+    padding: 1.5rem 1.75rem;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow);
+  }
+
+  .scores-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .score-row:last-child { margin-bottom: 0; }
+
+  .score-civ {
+    font-size: 0.83rem;
+    min-width: 92px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .score-civ.winner { color: var(--text); font-weight: 700; }
+
+  .score-track {
+    flex: 1;
+    height: 8px;
+    background: var(--bg2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .score-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.9s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+  }
+
+  .score-pt {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 700;
+    min-width: 32px;
+    text-align: right;
+  }
+
+  .connect-card {
+    background: #FFF8EE;
+    border: 1.5px solid rgba(181,98,30,0.22);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+
+  .connect-card-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+  }
+
+  .connect-text {
+    font-size: 0.88rem;
+    line-height: 1.8;
+    color: var(--text-mid);
+  }
+
+  .connect-text strong { color: var(--text); font-weight: 700; }
+
+  .retry-btn {
+    width: 100%;
+    padding: 0.95rem;
+    background: var(--surface);
+    color: var(--text-muted);
+    border: 1.5px solid var(--border-strong);
+    border-radius: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .retry-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── TRANSITIONS ── */
+  .screen-leave { animation: fadeOut 0.28s ease both !important; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeOut {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-14px); }
+  }
+
+  @keyframes rotateSlow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--text);
+    color: #fff;
+    padding: 0.7rem 1.5rem;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- INTRO -->
+  <div id="intro-screen">
+    <div class="intro-emblem">
+      <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="60" cy="60" r="56" stroke="rgba(181,98,30,0.3)" stroke-width="1"/>
+        <circle cx="60" cy="60" r="44" stroke="rgba(181,98,30,0.15)" stroke-width="1" stroke-dasharray="4 4"/>
+        <circle cx="60" cy="60" r="32" stroke="rgba(181,98,30,0.4)" stroke-width="1.5"/>
+        <polygon points="60,20 68,44 94,44 74,58 82,82 60,68 38,82 46,58 26,44 52,44" fill="rgba(181,98,30,0.85)" stroke="rgba(181,98,30,0.5)" stroke-width="0.5"/>
+        <circle cx="60" cy="60" r="6" fill="#B5621E"/>
+      </svg>
+    </div>
+
+    <div class="intro-kicker">세계 고대 문명 · 심리 테스트</div>
+    <h1 class="intro-title">나는 어떤<br><span>문명인</span>일까?</h1>
+    <p class="intro-sub">7가지 질문으로 알아보는 나의 고대 문명 유형</p>
+
+    <div class="intro-desc">
+      <p>고대 메소포타미아, 이집트, 인도, 중국 — 네 문명은 서로 다른 환경에서 전혀 다른 방식으로 발전했어.</p>
+      <p>7가지 질문에 솔직하게 답하면, 네가 <strong>어떤 문명 유형에 가까운지</strong> 알 수 있어. 정답은 없어 — 네 직관대로 고르면 돼.</p>
+    </div>
+
+    <div class="civ-preview">
+      <div class="civ-chip"><div class="civ-dot" style="background:#C2813A"></div>메소포타미아 문명</div>
+      <div class="civ-chip"><div class="civ-dot" style="background:#D4A017"></div>이집트 문명</div>
+      <div class="civ-chip"><div class="civ-dot" style="background:#3A8C6E"></div>인도 문명</div>
+      <div class="civ-chip"><div class="civ-dot" style="background:#B03A3A"></div>중국 문명</div>
+    </div>
+
+    <button class="start-btn" onclick="startQuiz()">테스트 시작하기 →</button>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen"></div>
+
+  <!-- RESULT -->
+  <div id="result-screen"></div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const questions = [
+  {
+    icon: "🌾",
+    text: "먹을 것이 부족하다. 어떻게 할까?",
+    context: "생존의 출발점 — 인류의 첫 번째 선택이었어.",
+    hint: "생존 전략",
+    options: [
+      { text: "사냥하며 이동한다. 한 곳에 묶이기 싫다.", scores: { meso: 0, egypt: 1, india: 0, china: 1 } },
+      { text: "한 곳에 정착해 땅을 일군다. 안정이 먼저다.", scores: { meso: 2, egypt: 2, india: 1, china: 1 } },
+      { text: "큰 강 근처를 찾는다. 물이 있으면 다 해결된다.", scores: { meso: 1, egypt: 3, india: 2, china: 2 } },
+      { text: "어디든 상관없다. 계단식으로 개간하면 된다.", scores: { meso: 0, egypt: 0, india: 3, china: 1 } }
+    ]
+  },
+  {
+    icon: "🏺",
+    text: "식량이 남아돌기 시작했다. 어떻게 처리할까?",
+    context: "잉여 자원은 문명의 씨앗이었어.",
+    hint: "잉여 자원 관리",
+    options: [
+      { text: "다 같이 나눠 먹는다. 저장은 귀찮다.", scores: { meso: 0, egypt: 1, india: 1, china: 0 } },
+      { text: "신전에 바친다. 공동체를 위해 신에게 감사해야 한다.", scores: { meso: 2, egypt: 3, india: 1, china: 0 } },
+      { text: "창고에 기록하며 보관한다. 나중을 대비해야 한다.", scores: { meso: 1, egypt: 2, india: 3, china: 1 } },
+      { text: "왕실이 관리하고 필요할 때 나눈다. 중앙 통제가 효율적이다.", scores: { meso: 1, egypt: 1, india: 0, china: 3 } }
+    ]
+  },
+  {
+    icon: "⚖️",
+    text: "사람이 많아졌다. 함께 살려면?",
+    context: "질서의 문제 — 사회마다 해답이 달랐어.",
+    hint: "사회 질서",
+    options: [
+      { text: "각자 알아서 살면 된다. 간섭이 싫다.", scores: { meso: 0, egypt: 0, india: 0, china: 0 } },
+      { text: "법을 만든다. 모두에게 공평한 규칙이 필요하다.", scores: { meso: 3, egypt: 1, india: 1, china: 1 } },
+      { text: "신분에 따라 역할을 나눈다. 혼란을 막으려면 구분이 필요하다.", scores: { meso: 1, egypt: 2, india: 3, china: 2 } },
+      { text: "왕이 하늘의 뜻을 받아 다스린다. 절대적 권위가 있어야 한다.", scores: { meso: 1, egypt: 3, india: 0, china: 2 } }
+    ]
+  },
+  {
+    icon: "🌊",
+    text: "큰 홍수가 났다. 공동체 전체가 대응해야 한다.",
+    context: "자연재해는 문명을 만들기도 부수기도 했어.",
+    hint: "위기 대응",
+    options: [
+      { text: "제방과 수로를 함께 만든다. 조직이 먼저다.", scores: { meso: 2, egypt: 2, india: 1, china: 3 } },
+      { text: "신에게 제사를 올린다. 자연은 신의 영역이다.", scores: { meso: 2, egypt: 3, india: 1, china: 1 } },
+      { text: "도시를 미리 높은 곳에 계획 설계한다. 예방이 최선이다.", scores: { meso: 0, egypt: 1, india: 3, china: 1 } },
+      { text: "기록으로 남긴다. 다음 세대가 같은 실수를 안 하도록.", scores: { meso: 3, egypt: 1, india: 0, china: 2 } }
+    ]
+  },
+  {
+    icon: "🔮",
+    text: "중요한 결정을 내려야 한다. 무엇을 근거로 할까?",
+    context: "의사결정의 방식 — 권위의 원천이 달랐어.",
+    hint: "의사결정",
+    options: [
+      { text: "법전을 찾는다. 규칙대로 하면 된다.", scores: { meso: 3, egypt: 0, india: 1, china: 1 } },
+      { text: "신관에게 묻는다. 신의 뜻이 중요하다.", scores: { meso: 1, egypt: 3, india: 2, china: 1 } },
+      { text: "동물 뼈나 거북 껍질로 점을 친다.", scores: { meso: 0, egypt: 1, india: 0, china: 3 } },
+      { text: "신분 높은 사람들이 모여 논의한다.", scores: { meso: 1, egypt: 1, india: 3, china: 1 } }
+    ]
+  },
+  {
+    icon: "💀",
+    text: "죽은 뒤 세상에 대해 어떻게 생각하나?",
+    context: "내세관 — 문명의 깊이를 보여주는 질문이야.",
+    hint: "내세관",
+    options: [
+      { text: "현세가 중요하다. 지금 잘 살면 된다.", scores: { meso: 1, egypt: 0, india: 2, china: 2 } },
+      { text: "죽어도 영혼은 살아있다. 몸을 잘 보존해야 한다.", scores: { meso: 0, egypt: 3, india: 1, china: 0 } },
+      { text: "지금의 삶이 다음 삶을 결정한다. 선하게 살아야 한다.", scores: { meso: 0, egypt: 1, india: 3, china: 0 } },
+      { text: "죽어도 조상은 살아있다. 제사로 연결되어야 한다.", scores: { meso: 0, egypt: 1, india: 0, china: 3 } }
+    ]
+  },
+  {
+    icon: "🗺️",
+    text: "다른 지역과 어떻게 지낼까?",
+    context: "대외 관계 — 문명의 성격을 드러내는 선택이야.",
+    hint: "대외 관계",
+    options: [
+      { text: "교역이 우선이다. 물건을 주고받으며 부를 쌓는다.", scores: { meso: 3, egypt: 1, india: 3, china: 0 } },
+      { text: "정복이 먼저다. 영토를 넓혀야 강해진다.", scores: { meso: 2, egypt: 2, india: 0, china: 2 } },
+      { text: "독자적으로 발전한다. 내부가 더 중요하다.", scores: { meso: 0, egypt: 1, india: 0, china: 3 } },
+      { text: "주변을 제압해 조공을 받는다.", scores: { meso: 1, egypt: 2, india: 1, china: 3 } }
+    ]
+  }
+];
+
+const results = {
+  meso: {
+    name: "메소포타미아 문명형",
+    sub: "두 강 사이의 현실주의자",
+    emoji: "📜",
+    color: "#B5621E",
+    tagBg: "rgba(181,98,30,0.12)",
+    tagBorder: "rgba(181,98,30,0.35)",
+    tagColor: "#8C3D08",
+    desc: "당신은 규칙과 기록을 중시하는 현실적 사고의 소유자입니다. 이상보다 제도를, 감정보다 법을 신뢰합니다. 함무라비 법전처럼 공정한 질서가 문명의 기반이라고 믿는 유형 — 복잡한 세상을 구조로 정리하려 합니다.",
+    traits: ["함무라비 법전", "쐐기 문자", "도시 국가", "상업 교역"],
+    connect: "<strong>함무라비 법전 조항 분석 활동과 연결해 보자.</strong> '귀족과 평민이 같은 죄를 지었는데 왜 벌이 다를까?' 질문으로 메소포타미아 사회 구조를 탐구해봐."
+  },
+  egypt: {
+    name: "이집트 문명형",
+    sub: "나일강의 신성한 권위자",
+    emoji: "🏛️",
+    color: "#9A7200",
+    tagBg: "rgba(154,114,0,0.1)",
+    tagBorder: "rgba(154,114,0,0.3)",
+    tagColor: "#6B4E00",
+    desc: "당신은 자연의 리듬과 절대적 권위를 신뢰합니다. 불확실한 세상을 신이나 강력한 지도자를 통해 질서로 바꾸려 하며, 영원을 꿈꿉니다. 파라오처럼 하늘과 땅을 이어주는 존재가 되고 싶은 유형.",
+    traits: ["파라오 체제", "피라미드", "상형 문자", "태양력"],
+    connect: "<strong>'피라미드는 왜 그렇게 크게 지었을까?' 탐구 활동으로 연결해 보자.</strong> 파라오의 신성과 권력이 어떻게 만들어졌는지, 이집트인의 내세관과 엮어 생각해봐."
+  },
+  india: {
+    name: "인도 문명형",
+    sub: "인더스강의 체계적 설계자",
+    emoji: "🏗️",
+    color: "#2E7D5E",
+    tagBg: "rgba(46,125,94,0.1)",
+    tagBorder: "rgba(46,125,94,0.3)",
+    tagColor: "#1A5A40",
+    desc: "당신은 계획과 구조를 통해 복잡성을 관리합니다. 사회를 역할에 따라 구분하고, 도시를 설계하듯 삶을 정밀하게 조직화하려 합니다. 모헨조다로의 격자형 도시계획처럼 체계와 예방을 중시하는 유형.",
+    traits: ["계획도시 설계", "카스트 제도", "인더스 교역", "브라만교"],
+    connect: "<strong>카스트 제도의 기원과 현재 인도의 논쟁으로 연결해 보자.</strong> '신분제는 왜 만들어졌을까? 정당할 수 있을까?' — 역사와 현재를 잇는 토론 활동에 활용해봐."
+  },
+  china: {
+    name: "중국 문명형",
+    sub: "황허강의 집단 조화론자",
+    emoji: "🐉",
+    color: "#A03030",
+    tagBg: "rgba(160,48,48,0.1)",
+    tagBorder: "rgba(160,48,48,0.3)",
+    tagColor: "#7A1A1A",
+    desc: "당신은 혈연과 위계를 통한 안정을 중시합니다. 왕과 제후, 조상과 후손의 연결이 사회를 지탱한다고 믿으며, 공동체의 조화를 개인보다 우선시합니다. 주나라 봉건제처럼 관계 중심으로 세상을 바라보는 유형.",
+    traits: ["봉건제", "갑골문", "청동 제기", "조상 숭배"],
+    connect: "<strong>주의 봉건제 구조 분석 활동으로 연결해 보자.</strong> '왕이 직접 다스리는 것과 제후를 두는 것의 차이는?' 그리고 봉건제는 왜 무너졌는지 구조적으로 파악해봐."
+  }
+};
+
+const civOrder = ['meso', 'egypt', 'india', 'china'];
+const civNames = { meso: '메소포타미아', egypt: '이집트', india: '인도', china: '중국' };
+
+let step = 0;
+let answers = [];
+
+function startQuiz() {
+  const intro = document.getElementById('intro-screen');
+  intro.classList.add('screen-leave');
+  setTimeout(() => {
+    intro.style.display = 'none';
+    const quiz = document.getElementById('quiz-screen');
+    quiz.style.display = 'block';
+    renderQuestion();
+  }, 300);
+}
+
+function renderQuestion() {
+  const q = questions[step];
+  const sel = answers[step];
+  const pct = Math.round((step / questions.length) * 100);
+  const quiz = document.getElementById('quiz-screen');
+
+  quiz.innerHTML = `
+    <div class="progress-header">
+      <div class="q-counter"><span>${step + 1}</span> / ${questions.length}</div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="q-hint-badge">${q.hint}</div>
+    </div>
+
+    <div class="question-card">
+      <span class="question-icon">${q.icon}</span>
+      <div class="question-text">${q.text}</div>
+      <div class="question-context">${q.context}</div>
+      <div class="options-list">
+        ${q.options.map((o, i) => `
+          <button class="opt${sel === i ? ' selected' : ''}" onclick="pick(${i})">
+            <span class="opt-label">${String.fromCharCode(65 + i)}</span>
+            <span class="opt-text">${o.text}</span>
+          </button>`).join('')}
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="nav-btn" onclick="go(-1)" ${step === 0 ? 'disabled' : ''}>← 이전</button>
+      <button class="nav-btn next" onclick="go(1)" ${sel === undefined ? 'disabled' : ''}>${step === questions.length - 1 ? '결과 보기' : '다음 →'}</button>
+    </div>
+  `;
+
+  // Refresh animations
+  quiz.querySelectorAll('.progress-header, .question-card, .nav-row').forEach(el => {
+    el.style.animationName = 'none';
+    requestAnimationFrame(() => { el.style.animationName = ''; });
+  });
+}
+
+function pick(i) {
+  answers[step] = i;
+  renderQuestion();
+}
+
+function go(dir) {
+  const newStep = step + dir;
+  if (newStep < 0) return;
+  if (newStep >= questions.length) {
+    showResult();
+    return;
+  }
+  step = newStep;
+  renderQuestion();
+}
+
+function showResult() {
+  const totals = { meso: 0, egypt: 0, india: 0, china: 0 };
+  answers.forEach((a, i) => {
+    if (a !== undefined) {
+      const sc = questions[i].options[a].scores;
+      civOrder.forEach(c => totals[c] += sc[c]);
+    }
+  });
+
+  const max = Math.max(...civOrder.map(c => totals[c]));
+  const winner = civOrder.find(c => totals[c] === max);
+  const r = results[winner];
+
+  const quiz = document.getElementById('quiz-screen');
+  quiz.classList.add('screen-leave');
+
+  setTimeout(() => {
+    quiz.style.display = 'none';
+    const resultEl = document.getElementById('result-screen');
+    resultEl.style.display = 'block';
+
+    resultEl.innerHTML = `
+      <div class="result-header">
+        <div class="result-kicker">당신의 문명 유형</div>
+        <div class="result-emblem" style="background:${r.tagBg};border-color:${r.tagBorder};">${r.emoji}</div>
+        <div class="result-civ-name" style="color:${r.color};">${r.name}</div>
+        <div class="result-sub">${r.sub}</div>
+      </div>
+
+      <div class="result-body">
+        <div class="result-desc-card">
+          <p>${r.desc}</p>
+          <div class="traits-row">
+            ${r.traits.map(t => `<span class="trait-tag" style="background:${r.tagBg};border-color:${r.tagBorder};color:${r.tagColor};">${t}</span>`).join('')}
+          </div>
+        </div>
+
+        <div class="scores-card">
+          <div class="scores-title">문명 유형 점수</div>
+          ${civOrder.map(c => {
+            const pct = max > 0 ? Math.round((totals[c] / max) * 100) : 0;
+            const isWin = c === winner;
+            return `<div class="score-row">
+              <span class="score-civ${isWin ? ' winner' : ''}">${civNames[c]}</span>
+              <div class="score-track">
+                <div class="score-fill" id="bar-${c}" style="background:${isWin ? results[c].color : 'rgba(120,90,50,0.2)'};width:0%"></div>
+              </div>
+              <span class="score-pt">${totals[c]}pt</span>
+            </div>`;
+          }).join('')}
+        </div>
+
+        <div class="connect-card">
+          <div class="connect-card-title">수업 연결 포인트</div>
+          <div class="connect-text">${r.connect}</div>
+        </div>
+
+        <div>
+          <button class="retry-btn" onclick="restart()">다시 테스트하기</button>
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      civOrder.forEach(c => {
+        const pct = max > 0 ? Math.round((totals[c] / max) * 100) : 0;
+        const bar = document.getElementById('bar-' + c);
+        if (bar) bar.style.width = pct + '%';
+      });
+    }, 400);
+
+  }, 300);
+}
+
+function restart() {
+  step = 0;
+  answers = [];
+  const result = document.getElementById('result-screen');
+  result.classList.add('screen-leave');
+  setTimeout(() => {
+    result.style.display = 'none';
+    result.innerHTML = '';
+    result.classList.remove('screen-leave');
+    const quiz = document.getElementById('quiz-screen');
+    quiz.style.display = 'block';
+    quiz.classList.remove('screen-leave');
+    renderQuestion();
+  }, 300);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
